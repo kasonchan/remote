@@ -34,15 +34,8 @@ val baseSettings = Seq(
 
 lazy val allSettings = baseSettings ++ buildSettings
 
-lazy val local = project
-  .settings(moduleName := "local")
-  .settings(allSettings: _*)
-  .settings(
-    libraryDependencies ++= testDependencies
-  )
-
-lazy val remote = project
-  .settings(moduleName := "remote")
+lazy val remote = project.in(file("."))
+  .settings(moduleName := name)
   .settings(allSettings: _*)
   .settings(
     libraryDependencies ++= testDependencies

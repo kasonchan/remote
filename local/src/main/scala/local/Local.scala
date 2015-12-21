@@ -38,7 +38,7 @@ class Worker extends Actor with ActorLogging {
 
   lazy val timeout = Timeout(10 seconds)
 
-  val remote = context.actorSelection("akka.tcp://remotesystem@127.0.0.1:2552/user/remoteactor")
+  val remote = context.actorSelection("akka.tcp://remotesystem@127.0.0.1:5150/user/remoteactor")
 
   override def preRestart(reason: Throwable, message: Option[Any]): Unit = {
     log.info("Pre-restart " + reason.toString)

@@ -1,7 +1,9 @@
 package remote
 
-import akka.actor.{Actor, ActorLogging, ActorSystem, Props}
+import akka.actor._
 
+import scala.annotation.tailrec
+import scala.io.StdIn
 import scala.language.postfixOps
 
 /**
@@ -9,12 +11,26 @@ import scala.language.postfixOps
   */
 object Remote {
 
+  @tailrec
+  def msg(actor: ActorRef): Any = {
+    StdIn.readLine() match {
+      case "quit" =>
+        actor ! "quit"
+        println("remote system quits")
+      case x =>
+        actor ! x
+        msg(actor)
+    }
+  }
+
   def main(args: Array[String]) {
     val system = ActorSystem("remotesystem")
 
     val actor = system.actorOf(Props[Worker], "remoteactor")
 
     actor ! "remote system starts"
+
+    msg(actor)
   }
 
 }
@@ -38,8 +54,10 @@ class Worker extends Actor with ActorLogging {
   }
 
   def receive: PartialFunction[Any, Unit] = {
+    case "quit" =>
+      log.info(sender().path.name + ": " + "quit")
+      context.system.terminate()
     case x =>
-      sender() ! x.toString
-      log.info(x.toString)
+      log.info(sender().path.name + ": " + x.toString)
   }
 }

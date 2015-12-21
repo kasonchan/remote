@@ -1,12 +1,26 @@
 package local
 
-import akka.actor.{Actor, ActorLogging, ActorSystem, Props}
+import akka.actor._
 import akka.util.Timeout
 
+import scala.annotation.tailrec
 import scala.concurrent.duration._
+import scala.io.StdIn
 import scala.language.postfixOps
 
 object Local {
+
+  @tailrec
+  def msg(actor: ActorRef): Any = {
+    StdIn.readLine() match {
+      case "quit" =>
+        actor ! "quit"
+        println("remote system quits")
+      case x =>
+        actor ! x
+        msg(actor)
+    }
+  }
 
   def main(args: Array[String]) {
     val system = ActorSystem("localsystem")
@@ -15,9 +29,7 @@ object Local {
 
     actor ! "local system starts"
 
-    actor ! "Testing"
-
-    actor ! "Testing"
+    msg(actor)
   }
 
 }
@@ -45,9 +57,12 @@ class Worker extends Actor with ActorLogging {
   }
 
   def receive: PartialFunction[Any, Unit] = {
+    case "local system starts" =>
+    case "quit" =>
+      remote ! "quit"
+      context.system.terminate()
     case x =>
-      sender() ! "I don't know"
-      remote ! "Hey"
-      log.info(x.toString)
+      remote ! x
+      log.info(sender().path.name + ": " + x.toString)
   }
 }
